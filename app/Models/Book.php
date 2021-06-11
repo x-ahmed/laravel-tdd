@@ -48,6 +48,18 @@ class Book extends Model
         $this->attributes['slug'] = Str::slug($this->attributes['title']);
     }
 
+    public function setAuthorIdAttribute($value)
+    {
+        $this->attributes['author_id'] = (Author::firstOrCreate([
+            'name' => $value,
+        ]))->id;
+    }
+
+    public function author()
+    {
+        return $this->belongsTo(Author::class);
+    }
+
     // public function getRouteKeyName()
     // {
     //     return 'slug';

@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Models\Book;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
+use App\Models\Book;
+use App\Models\Author;
+use Illuminate\Testing\TestResponse;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class BookManagementTest extends TestCase
 {
@@ -51,10 +52,10 @@ class BookManagementTest extends TestCase
      * @test
      * @return void
      */
-    public function a_author_is_required(): void
+    public function an_author_id_is_required(): void
     {
-        $response = $this->postNewBookWithEmptyValueFor('author');
-        $response->assertSessionHasErrors('author');
+        $response = $this->postNewBookWithEmptyValueFor('author_id');
+        $response->assertSessionHasErrors('author_id');
     }
 
     /**
@@ -71,11 +72,12 @@ class BookManagementTest extends TestCase
 
         $response = $this->patch($book->update_route, [
             'title' => 'New Title',
-            'author' => 'New Author',
+            'author_id' => 'New Author',
         ]);
 
         $this->assertEquals('New Title', Book::first()->title);
-        $this->assertEquals('New Author', Book::first()->author);
+        $this->assertEquals(2, Book::first()->author_id);
+        $this->assertEquals('New Author', Book::first()->author->name);
         $response->assertRedirect($book->fresh()->show_route);
     }
 
@@ -99,6 +101,22 @@ class BookManagementTest extends TestCase
     }
 
     /**
+     * a_new_author_is_automatically_added
+     *
+     * @test
+     */
+    public function a_new_author_is_automatically_added()
+    {
+        $this->post(route('book.store'), $this->validData());
+
+        $book = Book::first();
+        $author = Author::first();
+
+        $this->assertCount(1, Author::all());
+        $this->assertEquals($author->id, $book->author_id);
+    }
+
+    /**
      * validData
      *
      * @return array
@@ -107,7 +125,7 @@ class BookManagementTest extends TestCase
     {
         return [
             'title' => 'Cool Book',
-            'author' => 'Ahmed',
+            'author_id' => 'Ahmed',
         ];
     }
 
