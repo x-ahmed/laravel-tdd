@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
-class BookReservationTest extends TestCase
+class BookManagementTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -21,22 +21,25 @@ class BookReservationTest extends TestCase
     /**
      * a_book_can_be_added_to_the_library
      *
-     * @test void
+     * @test
+     * @return void
      */
     public function a_book_can_be_added_to_the_library(): void
     {
-        $response = $this->post('/book', $this->validData());
+        $response = $this->post(route('book.store'), $this->validData());
+        $book = Book::first();
 
-        $response->assertOk();
         $this->assertCount(1, Book::all());
+        $response->assertRedirect($book->show_route);
     }
 
     /**
      * a_title_is_required
      *
-     * @test void
+     * @test
+     * @return void
      */
-    public function a_title_is_required():void
+    public function a_title_is_required(): void
     {
         $response = $this->postNewBookWithEmptyValueFor('title');
         $response->assertSessionHasErrors('title');
@@ -45,9 +48,10 @@ class BookReservationTest extends TestCase
     /**
      * a_author_is_required
      *
-     * @test void
+     * @test
+     * @return void
      */
-    public function a_author_is_required():void
+    public function a_author_is_required(): void
     {
         $response = $this->postNewBookWithEmptyValueFor('author');
         $response->assertSessionHasErrors('author');
@@ -56,22 +60,42 @@ class BookReservationTest extends TestCase
     /**
      * a_book_can_be_updated
      *
-     * @test void
+     * @test
+     * @return void
      */
     public function a_book_can_be_updated(): void
     {
-        $this->post('/book', $this->validData());
+        $this->post(route('book.store'), $this->validData());
 
         $book = Book::first();
 
-        $response = $this->patch("/book/{$book->id}", [
+        $response = $this->patch($book->update_route, [
             'title' => 'New Title',
             'author' => 'New Author',
         ]);
 
-        $response->assertOk();
         $this->assertEquals('New Title', Book::first()->title);
         $this->assertEquals('New Author', Book::first()->author);
+        $response->assertRedirect($book->fresh()->show_route);
+    }
+
+    /**
+     * a_book_can_be_deleted
+     *
+     * @test
+     * @return void
+     */
+    public function a_book_can_be_deleted()
+    {
+        $this->post(route('book.store'), $this->validData());
+
+        $book = Book::first();
+        $this->assertCount(1, Book::all());
+
+        $response = $this->delete($book->destroy_route);
+
+        $this->assertCount(0, Book::all());
+        $response->assertRedirect(route('book.index'));
     }
 
     /**
@@ -96,7 +120,7 @@ class BookReservationTest extends TestCase
     private function postNewBookWithEmptyValueFor(string $attribute): TestResponse
     {
         return $this->post(
-            '/book',
+            route('book.store'),
             \array_merge($this->validData(), [$attribute => ''])
         );
     }
