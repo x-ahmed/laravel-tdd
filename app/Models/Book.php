@@ -60,6 +60,38 @@ class Book extends Model
         return $this->belongsTo(Author::class);
     }
 
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    public function checkout(User $user)
+    {
+        $this->reservations()->create([
+            'user_id' => $user->id,
+            'checked_out_at' => now(),
+            'checked_in_at' => null,
+        ]);
+    }
+
+    public function checkin(User $user)
+    {
+        $this->reservations()
+            ->whereUserId($user->id)
+            ->whereNotNull('checked_out_at')
+            ->whereNull('checked_in_at')
+            ->get()->pipe(function ($reservations) {
+                if (\is_null($reservations->first())) {
+                    throw new \Exception;
+                }
+                return $reservations->first();
+            })
+            ->update([
+                'checked_out_at' => null,
+                'checked_in_at' => now(),
+            ]);
+    }
+
     // public function getRouteKeyName()
     // {
     //     return 'slug';
