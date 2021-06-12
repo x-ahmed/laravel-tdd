@@ -22,7 +22,7 @@ Route::view('/login', 'welcome')->name('login');
 Route::post('/checkin/{book}', [CheckinBookController::class, 'store']);
 Route::post('/checkout/{book}', [CheckoutBookController::class, 'store']);
 
-Route::post('/author', [AuthorController::class, 'store']);
+Route::post('/authors', [AuthorController::class, 'store']);
 
 Route::delete('/book/{book}-{slug}', [BookController::class, 'destroy'])->name('book.destroy');
 Route::patch('/book/{book}-{slug}', [BookController::class, 'update'])->name('book.update');
