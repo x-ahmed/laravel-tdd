@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\CheckinBookController;
+use App\Http\Controllers\CheckoutBookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +16,11 @@ use App\Http\Controllers\AuthorController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::view('/login', 'welcome')->name('login');
+
+Route::post('/checkin/{book}', [CheckinBookController::class, 'store']);
+Route::post('/checkout/{book}', [CheckoutBookController::class, 'store']);
 
 Route::post('/author', [AuthorController::class, 'store']);
 

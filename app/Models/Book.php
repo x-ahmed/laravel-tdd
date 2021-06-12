@@ -70,7 +70,7 @@ class Book extends Model
         $this->reservations()->create([
             'user_id' => $user->id,
             'checked_out_at' => now(),
-            'checked_in_at' => null,
+            // 'checked_in_at' => null,
         ]);
     }
 
@@ -87,7 +87,7 @@ class Book extends Model
                 return $reservations->first();
             })
             ->update([
-                'checked_out_at' => null,
+                // 'checked_out_at' => null,
                 'checked_in_at' => now(),
             ]);
     }
